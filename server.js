@@ -1,7 +1,7 @@
 
 var express = require('express');
 var app = express();
-var port = process.env.port || 1337;
+var port = process.env.PORT || 1337;
 
 var bodyParser = require('body-parser');
 // create application/x-www-form-urlencoded parser
