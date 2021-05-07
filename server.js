@@ -12,6 +12,12 @@ app.use(bodyParser.json());
 var auctionController = require('./Controller/AuctionController')();
 app.use("/api/auctions", auctionController);
 
+var biddingController = require('./Controller/BiddingController')();
+app.use("/api/bidding", biddingController);
+
+//var userController = require('./Controller/UserController')();
+//app.use('/api/user',userController);
+
 app.listen(port, function () {
     var datetime = new Date();
     var message = "Server runnning on Port:- " + port + "Started at :- " + datetime;
