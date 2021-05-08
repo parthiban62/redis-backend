@@ -13,7 +13,7 @@ var routes = function () {
     router.route('/')
         .get(function (req, res) {
             try{
-                client.lrange("Biddings",0,-1,function(err,biddings){ 
+                client.hgetall("Biddings",function(err,biddings){ 
                     if(biddings){
                         return res.status(200).send({
                             error:false,
@@ -37,54 +37,68 @@ var routes = function () {
             }                    
         });
 
+        //GET all biddings - api/auctions
+    router.route('/:id')
+    .get(function (req, res) {
+        try{
+            var id = req.params.id;
+            client.hmget("Biddings",id, function(err,biddings){ 
+                if(biddings){
+                    return res.status(200).send({
+                        error:false,
+                        message : "Biddings data fetched",
+                        data : biddings
+                    })
+                }
+                else{
+                    return res.status(500).send({
+                        error:true,
+                        message:"Unable to fetch data"
+                    })
+                }
+            })
+        }
+        catch(error){
+            return res.status(500).send({
+                error:true,
+                message:"Unable to fetch data"
+            })
+        }                    
+    });
+
         router.route('/')
         .post(function (req, res) {
+            
             try{
                 var auctionData = "";
-                var auctionId = "";
-                var jsonBody = req.body;
-                var currentBid = jsonBody.bidAmount;
-                jsonBody.bidTime = Date.now();
-                console.log(Date.now());
-                client.lpush("Biddings",JSON.stringify(jsonBody),function(err,biddings){ 
-                    if(biddings){
-                        client.hmget("Auctions", jsonBody.auctionId, function(err,auctions){ 
-                            if(auctions){
-                                auctionData = JSON.parse(auctions);
-                                //auctionData = JSON.parse(jsonBody);
-                                //console.log(auctionData.auctionId);
-                                //console.log(jsonBody);
-                                
-                                auctionData.currentBidAmount = currentBid;
-                                //console.log(auctionData.currentBidAmount);
-                                auctionId = auctionData.auctionId;
-                                //console.log(auctionData);
-                                                               
-                            }
-                            client.hmset("Auctions", auctionId, JSON.stringify(auctionData), function(err,result){
-                            })
-                            return res.status(200).send({
-                                error:false,
-                                message : "Biddings data fetched",
-                                data : biddings
-                            })
-                        })
+                jsonBody = req.body;
+                id = jsonBody.auctionId;
+                var currentBid = jsonBody.currentBid;
+                console.log(id);
+                client.hmset("Biddings", id, JSON.stringify(jsonBody), function(err,result){});
+                client.hmget("Auctions", id, function(err,auctions){ 
+                    if(auctions){
+                        auctionData = JSON.parse(auctions);
+                        auctionData.currentBid = currentBid;                                                               
                     }
-                    else{
-                        return res.status(500).send({
-                            error:true,
-                            message:"Unable to fetch data"
-                        })
-                    }
+                    client.hmset("Auctions", id, JSON.stringify(auctionData), function(err,result){
+                    })
+                    return res.status(200).send({
+                        error:false,
+                        message : "Biddings data created"
+                    }) 
                 })
             }
             catch(error){
                 return res.status(500).send({
                     error:true,
-                    message:"Unable to fetch data"
+                    message:"Unable to add data",
+                    errordata : error
                 })
-            }                    
-        });
+            }   
+            
+        })    
+            
 
     return router;
 };
