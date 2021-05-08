@@ -76,15 +76,14 @@ var routes = function () {
             try{
                 id = uuid.v4();
                 jsonBody = req.body;
-
-                client.hmset("Auctions", id, JSON.stringify(jsonBody), function(err,auctions){
-                    if(auctions){
+                jsonBody.auctionId = id;
+                client.hmset("Auctions", id, JSON.stringify(jsonBody), function(err,result){
+                    if(result == "OK"){
                         return res.status(200).send({
                             error:false,
                             message : "Auctions data created",
-                            id : id,
-                            data : auctions
-                        })
+                            result : result
+                        })                         
                     }
                     else{
                         return res.status(500).send({
@@ -111,9 +110,34 @@ var routes = function () {
 
     router.route('/:id')
         .put(function (req, res) {
-            
-                            res.status(200).send("put");
-                        
+            try{
+                var id = req.params.id;
+                client.hmset("Auctions", id, JSON.stringify(jsonBody), function(err,auctions){
+                    if(auctions){
+
+                        return res.status(200).send({
+                            error:false,
+                            message : "Auctions data modified",
+                            result : result
+                        })                         
+                    }
+                    else{
+                        return res.status(500).send({
+                            error:true,
+                            message:"Unable to modify data",
+                            errordata : err
+                        })
+                    }
+                })
+            }   
+            catch(error){
+                return res.status(500).send({
+                    error:true,
+                    message:"Unable to nodify data",
+                    errordata : error
+                })
+            } 
+        
         });        
 
     return router;
