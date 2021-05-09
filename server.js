@@ -4,7 +4,7 @@ var cors = require('cors')
 var app = express();
 app.use(cors())
 var http = require('http').Server(app);
-var io = require('socket.io').listen(http);
+var io = require('socket.io')(http);
 var bodyParser = require('body-parser');
 var port = process.env.PORT || 1337;
 
