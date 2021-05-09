@@ -42,9 +42,10 @@ var routes = function () {
             }                    
         });
     
-    //GET data of a particular auction - api/auctions/:id
+    //GET data of a particular auction - api/auctions/{id}
     router.route('/:id')
         .get(function (req, res) {
+            var auctionData = "";
             try{
                 client.hmget("Auctions", req.params.id, function(err,auctions){ 
                     if(auctions){
@@ -74,8 +75,9 @@ var routes = function () {
     router.route('/')
         .post(function (req, res) {
             try{
-                id = uuid.v4();
                 jsonBody = req.body;
+                //Generate unique id for Auction ID
+                id = uuid.v4();
                 jsonBody.auctionId = id;
                 client.hmset("Auctions", id, JSON.stringify(jsonBody), function(err,result){
                     if(result == "OK"){
@@ -100,14 +102,10 @@ var routes = function () {
                     message:"Unable to add data",
                     errordata : error
                 })
-            }          
-            
-            
-            
-            
+            }               
         });
 
-
+    //PUT modify auction - api/auctions/{id}
     router.route('/:id')
         .put(function (req, res) {
             try{
@@ -136,8 +134,7 @@ var routes = function () {
                     message:"Unable to nodify data",
                     errordata : error
                 })
-            } 
-        
+            }         
         });        
 
     return router;
